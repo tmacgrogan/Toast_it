@@ -4,6 +4,8 @@ import time
 
 import json
 
+import math
+
 #down: 900
 #up:2500
 
@@ -14,7 +16,8 @@ lowerservo_right_ch= 13;
 upperservo_left_ch = 14;
 upperservo_right_ch = 15;
 
-
+speed = 100;
+refresh_rate = 0.1; #seconds
 
 pi.set_mode(13, pigpio.OUTPUT);
 
@@ -34,10 +37,22 @@ def upper_cart(x): #test direction
 	servo(upperservo_left_ch, x);
 	servo(upperservo_right_ch, -x);
 
-def draw_line(point1, point2):
+def drive_line(point1, point2):
 	print("draw a line!");
+	x1 = point1["X"];
+	y1 = point1["Y"];
+	x2 = point2["X"];
+	y2 = point2["Y"];
+	dx = x2 - x1;
+	dy = y2 - y1;
+	length = math.sqrt( dx ** 2 + dy ** 2);
+	duration = length/speed; #in seconds
+	for t in range(duration/refresh_rate):
+		
+	
 
-def write_letter (char):
+
+def write_letter (char, local_origin):
 	curr_pos = {"X":0, "Y":0);
 	f = open("filename.json", r).read()
 	j = json.parse(f);
@@ -48,8 +63,8 @@ def write_letter (char):
 	else:
 		letter = j[char]
 		for point in letter:
-			draw_line(curr_pos, point);		
-
+			drive_line(curr_pos, point);		
+	
 
 
 
