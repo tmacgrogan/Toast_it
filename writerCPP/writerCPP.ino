@@ -54,7 +54,7 @@ double refresh_rate = 0.005; //seconds
 int letterDensity = 5;
 int pixelDensity = 1000;
 
-String TEXT = String("TOAST");
+String TEXT = "";
 
 void setup() {
   //fillArr();
@@ -71,16 +71,48 @@ void setup() {
   ur.attach(5);
   b.attach(6);
   Serial.begin(9600);
-  drive_line({0,0},0);
+  Serial.write("Initializing...\n");
+  //drive_line({0,0},0);
+  reset();
   analogWrite(10, 0);
-  Serial.write("STARTING\n");
+  Serial.write("Ready for input.\n");
+  while(1){
+    if(Serial.available()){
+      char c = Serial.read();
+      if(c=='\n'){
+//        Serial.write("recieved string '");
+//        Serial.print(TEXT);
+//        Serial.write("'\n");
+        break;
+      }
+      else{
+        TEXT += c;
+      }
+    }
+  }
 }
 
+void reset(){
+  upper_cart(0);
+  lower_cart(0);
+  currentX = 0;
+  currentY = 0;
+  burn(0);
+}
+
+
 void loop() {
-  for(int i = 0; i < TEXT.length(); i++ ){
+//  Serial.print("text length is ");
+//  Serial.print(TEXT.length());
+//  Serial.print(TEXT.charAt(0));
+//  Serial.print(TEXT.charAt(1));
+  for(int i = 0; i < TEXT.length()-1; i++ ){
+    if(TEXT.charAt(i) == ' '){
+      continue;
+    }
     write_letter(TEXT.charAt(i), i);
   }
-  Serial.write("done");
+//  Serial.write("done");
 //  while(1==1){
 //    
 //    
@@ -99,7 +131,7 @@ void loop() {
   
   drive_line({0,0},0);
 
-  while(1==1){
+  while(1){
     
     
   }
@@ -120,9 +152,9 @@ void upper_cart(double x){
 }
 
 void burn(bool burning){
-  Serial.write("burning\n");
+//  Serial.write("burning\n");
   percent(b, burning?0:90);
-  Serial.write("burnt\n");
+//  Serial.write("burnt\n");
 }
 
 void drive_line(Dest d, bool burning){
@@ -134,9 +166,9 @@ void drive_line(Dest d, bool burning){
   int dx = x2 - x1;
   int dy = y2 - y1;
   
-  Serial.write("getting length\n");
+//  Serial.write("getting length\n");
   double length = sqrt((dx*dx) + (dy*dy));
-  Serial.write("getting duration\n");
+//  Serial.write("getting duration\n");
   double duration = length / speed;
   int refreshes = duration/refresh_rate;
   for(int i = 0; i < refreshes; i++){
@@ -146,7 +178,7 @@ void drive_line(Dest d, bool burning){
     upper_cart(x);
     delay(refresh_rate*1000);
   }
-  Serial.write("FINISHED/n");
+//  Serial.write("FINISHED\n");
   currentX = x2;
   currentY = y2;
 }
@@ -155,10 +187,7 @@ void write_letter(char letter, int frameNum){
   double ox = (frameNum % letterDensity) * 100 / letterDensity;
   double oy = (frameNum / letterDensity) * 100 / letterDensity + 10;
   Letter l = arr[letter - 'A'];
-  Serial.write("x frame: ");
-  Serial.write((frameNum % letterDensity));
-  Serial.write("\ny frame: ");
-  Serial.write((frameNum / letterDensity));
+//  Serial.print("printing letter " + letter);
   for(int i = 0; i < 15; i++){
     if(l.dests[i][0] != 0 || l.dests[i][1] != 0 || l.dests[i][2] != 0){
       Dest target = {(l.dests[i][0]/letterDensity) + ox, (l.dests[i][1]/letterDensity) + oy};
